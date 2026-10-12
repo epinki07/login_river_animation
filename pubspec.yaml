@@ -1,4 +1,4 @@
-name: login_rive_animation
+name: login_river_animation
 description: "A new Flutter project."
 publish_to: 'none'
 version: 0.1.0+1
@@ -9,7 +9,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  rive: ^0.13.20
+  rive: 0.13.20
 
 dev_dependencies:
   flutter_test:
@@ -19,5 +19,5 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-  assets:
-    - assets/
+assets:
+  - assets/

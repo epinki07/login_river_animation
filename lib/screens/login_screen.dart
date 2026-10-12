@@ -13,14 +13,14 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     // Obtener el tamaño de la pantalla del dispositivo 
     final Size screenSize = MediaQuery.of(context).size;
-    return const Scaffold(
+    return Scaffold(
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 20.0),
           child: Column(
             children: [
               SizedBox(
-                width: size.width, 
+                width: screenSize.width, 
                 height:200,
                 child: RiveAnimation.asset("assets/login-bear-animation.riv")),
             ],
