@@ -2,7 +2,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "login_river_animation (Brave)",
+      "name": "login_rive_animation (Brave)",
       "request": "launch",
       "type": "dart",
       "deviceId": "chrome"

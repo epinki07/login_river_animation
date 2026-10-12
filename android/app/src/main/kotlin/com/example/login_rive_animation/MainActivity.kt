@@ -1,4 +1,4 @@
-package com.example.login_river_animation
+package com.example.login_rive_animation
 
 import io.flutter.embedding.android.FlutterActivity
 

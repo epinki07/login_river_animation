@@ -1,6 +1,6 @@
 {
-    "name": "login_river_animation",
-    "short_name": "login_river_animation",
+    "name": "login_rive_animation",
+    "short_name": "login_rive_animation",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

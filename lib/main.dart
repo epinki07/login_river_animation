@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:login_river_animation/screens/login_screen.dart';
+import 'package:login_rive_animation/screens/login_screen.dart';
 
 void main() {
   runApp(const MainApp());
 }
 
 class MainApp extends StatelessWidget {
-  const MainApp({super.key});
+  const MainApp({super.key}); 
 
   @override
   Widget build(BuildContext context) {

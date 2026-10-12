@@ -15,4 +15,4 @@ class _LoginScreenState extends State<LoginScreen> {
       body: RiveAnimation.asset("assets/login-bear-animation.riv"),
     );
   }
-}
+} 
