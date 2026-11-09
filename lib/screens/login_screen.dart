@@ -1,7 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:flutter/material.dart' as _email;
 import 'package:rive/rive.dart';
-import 'dart:async';//3.1 Importar el timer 
+
+import '../login_validation.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -24,29 +26,70 @@ class _LoginScreenState extends State<LoginScreen> {
   //3.2 Timer para detener la mirada al dejar de escribir
   Timer? _typingDebounce;
 
-//2.1 Crear variables para el focusNode
-final _emailFocusNode = FocusNode();
-final _passwordFocusNode = FocusNode();
+  //2.1 Crear variables para el focusNode
+  final _emailFocusNode = FocusNode();
+  final _passwordFocusNode = FocusNode();
 
-//2.2 Crear los listeners (Oyentes/Chismosos)
-void initState() {
-  super.initState();
+  //4.1 Controllers para manipular el texto escrito por el usuario
+  final emailCtrl = TextEditingController();
+  final passwordCtrl = TextEditingController();
 
-  _emailFocusNode.addListener(() {
-//Verificar que no sea nulo.
-  if (_emailFocusNode.hasFocus) {
-    if (_isHandsUp != null) {
-      //Ojos sin cerrar
-      _isHandsUp!.change(false);
-      _numLook?.value= 50; //mirada neutral 
+  //4.2 Errores para mostrar en la UI
+  String? emailError;
+  String? passwordError;
+
+  //4.4 Acción al botón
+  void _onLogin() {
+    // De lo que escribió el usuario, quita los espacios en blanco
+    final email = emailCtrl.text.trim();
+    final pass = passwordCtrl.text;
+
+    // Recalcular errores
+    final emailTypedError = isValidEmail(email) ? null : "Email inválido";
+    final passTypedError = isValidPassword(pass) ? null : "Contraseña inválida";
+
+    // 4.5 Avisar que hubo un cambio
+    setState(() {
+      emailError = emailTypedError;
+      passwordError = passTypedError;
+    });
+
+    // 4.6 Cerrar el teclado y bajar manos
+
+    FocusScope.of(context).unfocus();
+    _typingDebounce?.cancel();
+    _isChecking?.change(false);
+    _isHandsUp?.change(false);
+    _numLook?.value = 50; // mirada neutral
+
+    //4.7 Activar triggers
+    if (emailTypedError == null && passTypedError == null) {
+      _trigSuccess?.fire();
+    } else {
+      _trigFail?.fire();
     }
   }
-});
-_passwordFocusNode.addListener(() {
-  //manos arriba en password
-  _isHandsUp?.change(_passwordFocusNode.hasFocus);
-});
-}
+
+  //2.2 Crear los listeners (Oyentes/Chismosos)
+  @override
+  void initState() {
+    super.initState();
+
+    _emailFocusNode.addListener(() {
+      //Verificar que no sea nulo.
+      if (_emailFocusNode.hasFocus) {
+        if (_isHandsUp != null) {
+          //Ojos sin cerrar
+          _isHandsUp!.change(false);
+          _numLook?.value = 50; //mirada neutral
+        }
+      }
+    });
+    _passwordFocusNode.addListener(() {
+      //manos arriba en password
+      _isHandsUp?.change(_passwordFocusNode.hasFocus);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -82,6 +125,8 @@ _passwordFocusNode.addListener(() {
                 ), //SizedBox
                 const SizedBox(height: 10),
                 TextField(
+                  // 4.8 vincular el controller
+                  controller: emailCtrl,
                   focusNode: _emailFocusNode,
                   onChanged: (value) {
                     if (_isHandsUp != null) {
@@ -95,17 +140,21 @@ _passwordFocusNode.addListener(() {
                     // 80 es medida de la calibracion, Clamp es el rango (abrazadera)
                     final look = (value.length / 80 * 100).clamp(0.0, 100.0);
                     _numLook?.value = look;
-                    //3.5 debounce: si vuelve a teclear, reinicia el contador 
+                    //3.5 debounce: si vuelve a teclear, reinicia el contador
                     _typingDebounce?.cancel(); //cancelamos cualquier timer que este corriendo
-                    _typingDebounce = Timer(const Duration(milliseconds: 3), () {
-                      //si se cierra la pantalla (!mounted) 
-                      if (!mounted) return;
-                      _isChecking?.change(false);
-                      });
+                    _typingDebounce = Timer(
+                      const Duration(milliseconds: 3000),
+                      () {
+                        //si se cierra la pantalla (!mounted)
+                        if (!mounted) return;
+                        _isChecking?.change(false);
+                      },
+                    );
                   },
                   keyboardType: TextInputType.emailAddress,
                   decoration: InputDecoration(
                     hintText: "Email@ejemplo.com",
+                    errorText: emailError,
                     prefixIcon: const Icon(Icons.email),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -114,6 +163,8 @@ _passwordFocusNode.addListener(() {
                 ),
                 const SizedBox(height: 10),
                 TextField(
+                  // 4.8 vincular el controller
+                  controller: passwordCtrl,
                   focusNode: _passwordFocusNode,
                   onChanged: (value) {
                     if (_isChecking != null) {
@@ -125,6 +176,8 @@ _passwordFocusNode.addListener(() {
                   },
                   obscureText: _isObscure,
                   decoration: InputDecoration(
+                    //4.9 Mostrar el texto de error
+                    errorText: passwordError,
                     hintText: "Password",
                     prefixIcon: const Icon(Icons.lock),
                     suffixIcon: IconButton(
@@ -142,20 +195,65 @@ _passwordFocusNode.addListener(() {
                     ),
                   ),
                 ),
+                const SizedBox(height: 10),
+                SizedBox(
+                  width: size.width,
+                  child: const Text(
+                    "¿Olvidaste tu contraseña?",
+                    textAlign: TextAlign.right,
+                    style: TextStyle(decoration: TextDecoration.underline),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                MaterialButton(
+                  height: 50,
+                  color: Colors.blueAccent,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  onPressed: _onLogin,
+                  child: const Text(
+                    "Iniciar sesión",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                // ¿No tienes cuenta? Creala
+                SizedBox(
+                  width: size.width,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text("¿No tienes cuenta?"),
+                      TextButton(
+                        onPressed: () {},
+                        child: const Text(
+                          "Regístrate",
+                          style: TextStyle(
+                            color: Colors.black,
+                            decoration: TextDecoration.underline,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
         ),
       ),
     );
-    @override
+  }
+
+  @override
   void dispose() {
-    //2.4 Liberar memoria de los focusNode
     _emailFocusNode.dispose();
     _passwordFocusNode.dispose();
-    //3.5 Liberar Timer
+    emailCtrl.dispose();
+    passwordCtrl.dispose();
     _typingDebounce?.cancel();
     super.dispose();
   }
-}
 }
